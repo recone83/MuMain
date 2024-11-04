@@ -2344,6 +2344,8 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         }
 #endif
     }
+
+    c->SkillSuccess = true;
 }
 
 void UseSkillWizard(CHARACTER* c, OBJECT* o)
@@ -2408,6 +2410,8 @@ void UseSkillWizard(CHARACTER* c, OBJECT* o)
     LetHeroStop();
     break;
     }
+
+    c->SkillSuccess = true;
 }
 
 void UseSkillElf(CHARACTER* c, OBJECT* o)
@@ -2465,6 +2469,8 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
         SetPlayerHighBowAttack(c);
         break;
     }
+
+    c->SkillSuccess = true;
 }
 
 void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
@@ -2616,6 +2622,8 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
         }
         break;
     }
+
+    pCha->SkillSuccess = true;
 }
 
 BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst)
@@ -2830,6 +2838,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
     default:
         break;
     }
+
+    pCha->SkillSuccess = true;
 }
 
 void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
@@ -2960,6 +2970,8 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         break;
         }
     }
+
+    pCha->SkillSuccess = true;
 }
 
 bool UseSkillRagePosition(CHARACTER* pCha)
@@ -5132,6 +5144,8 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
     }
     break;
     }
+
+    c->SkillSuccess = true;
 }
 
 void AttackKnight(CHARACTER* c, int Skill, float Distance)
@@ -5739,6 +5753,8 @@ void AttackKnight(CHARACTER* c, int Skill, float Distance)
             }
         }
     }
+
+    c->SkillSuccess = true;
 }
 
 void AttackWizard(CHARACTER* c, int Skill, float Distance)
@@ -6444,6 +6460,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         break;
         }
     }
+
+    c->SkillSuccess = true;
 }
 
 void AttackCommon(CHARACTER* c, int Skill, float Distance)
@@ -6695,6 +6713,7 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
             break;
         }
     }
+    c->SkillSuccess = true;
 }
 
 bool SkillKeyPush(int Skill)
@@ -6888,11 +6907,6 @@ bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
         }
     }
 
-    if (CheckSkillUseCondition(o, Skill) == false)
-    {
-        return false;
-    }
-
     if (Skill == AT_SKILL_SUMMON_EXPLOSION || Skill == AT_SKILL_SUMMON_REQUIEM || Skill == AT_SKILL_SUMMON_POLLUTION)
     {
         CheckTarget(c);
@@ -6903,6 +6917,16 @@ bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
     }
 
     if (!gSkillManager.DemendConditionCheckSkill(Skill))
+    {
+        return false;
+    }
+
+    if (CheckSkillUseCondition(o, Skill) == false)
+    {
+        return false;
+    }
+
+    if (CheckMana(c, Skill) == false)
     {
         return false;
     }
@@ -6949,6 +6973,8 @@ int ExecuteAttack(CHARACTER* c)
         g_pCursedTempleWindow->SetCursedTempleSkill(c, o, SelectedCharacter);
         return 0;
     }
+
+    c->SkillSuccess = false;
 
     if (
         g_pOption->IsAutoAttack()
@@ -7109,7 +7135,7 @@ int ExecuteAttack(CHARACTER* c)
                         }
                         if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
                         {
-                            return 1;
+                            return (int) CompletedAttack(c);
                         }
                     }
                 }
@@ -7117,7 +7143,7 @@ int ExecuteAttack(CHARACTER* c)
                 {
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
-                        return 1;
+                        return (int) CompletedAttack(c);
                     }
                 }
             }
@@ -7149,7 +7175,15 @@ int ExecuteAttack(CHARACTER* c)
         AttackCommon(c, Skill, Distance);
     }
 
-    return 1;
+    return (int) CompletedAttack(c);
+}
+
+bool CompletedAttack(CHARACTER* c)
+{
+    bool bCompletedMovement = (int)(!c->Movement || c->MovementType == MOVEMENT_ATTACK);
+    bool bSkillSuccess = c->SkillSuccess;
+
+    return bCompletedMovement && bSkillSuccess;
 }
 
 BOOL g_bWhileMovingZone = FALSE;
