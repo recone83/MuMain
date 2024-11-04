@@ -6974,7 +6974,10 @@ int ExecuteAttack(CHARACTER* c)
         return 0;
     }
 
-    c->SkillSuccess = false;
+    if (c->Movement)
+    {
+        c->SkillSuccess = false;
+    }
 
     if (
         g_pOption->IsAutoAttack()
@@ -7180,10 +7183,7 @@ int ExecuteAttack(CHARACTER* c)
 
 bool CompletedAttack(CHARACTER* c)
 {
-    bool bCompletedMovement = (int)(!c->Movement || c->MovementType == MOVEMENT_ATTACK);
-    bool bSkillSuccess = c->SkillSuccess;
-
-    return bCompletedMovement && bSkillSuccess;
+    return c->SkillSuccess && !c->Movement;
 }
 
 BOOL g_bWhileMovingZone = FALSE;
