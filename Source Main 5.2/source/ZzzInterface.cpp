@@ -6722,7 +6722,7 @@ bool SkillKeyPush(int Skill)
     return false;
 }
 
-void TriggerAttack(CHARACTER* c)
+void Attack(CHARACTER* c)
 {
     if ((MouseOnWindow || !SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429)) && MouseLButtonPush)
     {
@@ -6844,7 +6844,7 @@ void TriggerAttack(CHARACTER* c)
     ExecuteSkill(c, Skill, Distance);
 }
 
-bool CanExecuteAttack(CHARACTER* c, int Skill, float Distance)
+bool CanExecuteSkill(CHARACTER* c, int Skill, float Distance)
 {
     OBJECT* o = &c->Object;
 
@@ -6958,7 +6958,7 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
 
     int ClassIndex = gCharacterManager.GetBaseClass(c->Class);
 
-    if (!CanExecuteAttack(c, Skill, Distance))
+    if (!CanExecuteSkill(c, Skill, Distance))
     {
         return 0;
     }
@@ -7160,6 +7160,7 @@ int ExecuteSkill(CHARACTER* c, int Skill, float Distance)
             {
                 SendMove(c, o);
             }
+            return 0;
         }
     }
     if (ClassIndex == CLASS_ELF)
@@ -7792,7 +7793,7 @@ void MoveHero()
         MouseUpdateTime++;
     }
 
-    TriggerAttack(Hero);
+    Attack(Hero);
 
     int Index = ((int)Hero->Object.Position[1] / (int)TERRAIN_SCALE) * 256 + ((int)Hero->Object.Position[0] / (int)TERRAIN_SCALE);
     if (Index < 0) Index = 0;
